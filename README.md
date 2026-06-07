@@ -1,0 +1,1 @@
+# netol-diplom-kuber

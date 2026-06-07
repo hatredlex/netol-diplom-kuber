@@ -1,1 +1,1 @@
-# netol-diplom-kuber
+# Config files for Kubernetes Cluster in YC

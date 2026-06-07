@@ -1,1 +1,1 @@
-# Config files for Kubernetes Cluster in YC
+Config files for Kubernetes Cluster in YC

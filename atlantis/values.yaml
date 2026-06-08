@@ -1,0 +1,83 @@
+orgAllowlist: "github.com/hatredlex/netol-diplom-terr"
+
+github:
+  user: ""
+  token: ""
+  secret: ""
+
+environmentSecrets:
+  - name: ATLANTIS_GH_USER
+    secretKeyRef:
+      name: atlantis-vcs
+      key: ATLANTIS_GH_USER
+  - name: ATLANTIS_GH_TOKEN
+    secretKeyRef:
+      name: atlantis-vcs
+      key: ATLANTIS_GH_TOKEN
+  - name: ATLANTIS_GH_WEBHOOK_SECRET
+    secretKeyRef:
+      name: atlantis-vcs
+      key: ATLANTIS_GH_WEBHOOK_SECRET
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 4141
+
+ingress:
+  enabled: false
+
+dataStorage: 5Gi
+
+defaultTFVersion: "1.14.9"
+
+repoConfig: |
+  repos:
+    - id: /.*/
+      workflow: yandex
+      allowed_overrides: [workflow]
+      allow_custom_workflows: true
+
+  workflows:
+    yandex:
+      plan:
+        steps:
+          - run: mkdir -p ../bootstrap
+          - run: cp /etc/atlantis/terraform-files/terraform-sa-key.json ../bootstrap/terraform-sa-key.json
+          - run: cp /etc/atlantis/terraform-files/infra-backend.hcl backend.hcl
+          - run: cp /etc/atlantis/terraform-files/infra-terraform.tfvars terraform.tfvars
+          - init:
+              extra_args: ["-backend-config=backend.hcl"]
+          - plan
+      apply:
+        steps:
+          - run: mkdir -p ../bootstrap
+          - run: cp /etc/atlantis/terraform-files/terraform-sa-key.json ../bootstrap/terraform-sa-key.json
+          - run: cp /etc/atlantis/terraform-files/infra-backend.hcl backend.hcl
+          - run: cp /etc/atlantis/terraform-files/infra-terraform.tfvars terraform.tfvars
+          - apply
+
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 100m
+  limits:
+    memory: 512Mi
+    cpu: 500m
+
+extraVolumes:
+  - name: terraform-files
+    secret:
+      secretName: atlantis-terraform-files
+  - name: terraformrc
+    configMap:
+      name: atlantis-terraformrc
+
+extraVolumeMounts:
+  - name: terraform-files
+    mountPath: /etc/atlantis/terraform-files
+    readOnly: true
+  - name: terraformrc
+    mountPath: /home/atlantis/.terraformrc
+    subPath: .terraformrc
+    readOnly: true

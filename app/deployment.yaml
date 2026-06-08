@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: diplom-nginx
+  namespace: diplom-app
+  labels:
+    app: diplom-nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: diplom-nginx
+  template:
+    metadata:
+      labels:
+        app: diplom-nginx
+    spec:
+      containers:
+        - name: diplom-nginx
+          image: cr.yandex/crpbsthk2mbmmfskertl/diplom-nginx:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi

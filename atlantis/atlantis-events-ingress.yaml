@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: atlantis-events
+  namespace: atlantis
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /events
+            pathType: Prefix
+            backend:
+              service:
+                name: atlantis
+                port:
+                  number: 80
